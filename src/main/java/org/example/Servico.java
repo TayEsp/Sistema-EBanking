@@ -9,6 +9,7 @@ public class Servico {
         TRANSFERENCIA,
         SALDO,
         EXTRATO,
+        LOGIN,
         CRIACONTA;
 
     }
@@ -26,10 +27,23 @@ public class Servico {
     public boolean transferencia(float valor, String dest, String orig){
         Conta contaDest = contas.get(dest);
         Conta contaOrig = contas.get(orig);
+        float aux = 0;
 
-        //verificacao
+        if (contaDest!=null){
+            if(contaOrig.saldo>=valor){
+                aux = contaDest.saldo;
+                contaDest.saldo=aux+valor;
+                aux = contaOrig.saldo;
+                contaOrig.saldo=aux-valor;
+            }else{
+                System.out.print("conta sem saldo");
+            }
+
+        }else{
+            System.out.print("conta sem saldo");
+        }
+        
         return true;
-        //debita das duas contas
     }
 
     public void saldo(String numConta){
@@ -53,8 +67,30 @@ public class Servico {
             contas.put(conta.conta, conta);
             System.out.println("Conta criada com sucesso! Identificador: conta: " + conta.getConta());
         }
-
     }
+
+    public boolean autenticacao(Conta conta){
+        String numeroConta = conta.getConta();
+        int senha = conta.getSenha();
+
+        if (contas.containsKey(numeroConta)) {
+            Conta contaArmazenada = contas.get(numeroConta);
+            if (contaArmazenada.getSenha() == senha) {
+                System.out.println("Login bem-sucedido!");
+
+                return true;
+            }else{
+                System.out.println("ERRO: Senha inválida");
+                return false;
+            }
+        }else{
+            System.out.println("ERRO: Número da conta inválido");
+            return false;
+        }
+    }
+
+    //-------FAZER------
+    //funcao cria extrato
 
 
 }
