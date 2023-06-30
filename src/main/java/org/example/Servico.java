@@ -1,11 +1,13 @@
 package org.example;
 
 import org.example.Conta;
+
+import java.io.Serializable;
 import java.util.*;
 
-public class Servico {
+public class Servico implements Serializable{
 
-    public static enum tipoServico {
+    public static enum tipoServico{
         TRANSFERENCIA,
         SALDO,
         EXTRATO,
@@ -29,18 +31,20 @@ public class Servico {
         Conta contaOrig = contas.get(orig);
         float aux = 0;
 
-        if (contaDest!=null){
-            if(contaOrig.saldo>=valor){
+        if (contaDest.conta.equals(dest)){
+            if((float)contaOrig.getSaldo()>=(float)valor){
                 aux = contaDest.saldo;
                 contaDest.saldo=aux+valor;
                 aux = contaOrig.saldo;
                 contaOrig.saldo=aux-valor;
+                contas.replace(contaOrig.conta, contaOrig);
+                contas.replace(contaOrig.conta, contaOrig);
             }else{
                 System.out.print("conta sem saldo");
             }
 
         }else{
-            System.out.print("conta sem saldo");
+            System.out.print("destino invalido");
         }
         
         return true;

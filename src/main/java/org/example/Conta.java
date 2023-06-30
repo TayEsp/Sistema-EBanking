@@ -1,7 +1,8 @@
 package org.example;
 
+import java.io.Serializable;
 
-public class Conta {
+public class Conta implements Serializable{
     String conta;
     int senha;
     float saldo = 10000;
@@ -22,7 +23,7 @@ public class Conta {
     public void setSenha(int senha) {
         this.senha = senha;
     }
-    public void setSaldo(Long saldo) {
+    public void setSaldo(float saldo) {
         this.saldo = saldo;
     }
     public void setExtrato(String extrato) {

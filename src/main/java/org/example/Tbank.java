@@ -1,9 +1,7 @@
 package org.example;/*
  SAIBA MAIS: http://www.jgroups.org/manual/html/user-building-blocks.html#MessageDispatcher
 /**/
-import java.util.Collection;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import javax.swing.text.View;
 
@@ -35,56 +33,62 @@ public class Tbank extends ReceiverAdapter implements RequestHandler {
         canalDeComunicacao.setReceiver(this);	//quem irá lidar com as mensagens recebidas
 
         estado = new Servico();
+        int menu = 0;
 
         canalDeComunicacao.connect("Tenacious Bank");
-            System.out.println("========= Bem Vindo ao Tenacious Bank ==========");
-            System.out.println("1- Criar conta.");
-            System.out.println("2- Login.");
-            System.out.println("3- Sair.");
-            System.out.print("Digite a sua escolha:");
-            int menu = scan.nextInt();
-            scan.nextLine(); 
+            while(menu!=3){
+                System.out.println("========= Bem Vindo ao Tenacious Bank ==========");
+                System.out.println("1- Criar conta.");
+                System.out.println("2- Login.");
+                System.out.println("3- Sair.");
+                System.out.print("Digite a sua escolha:");
+                menu = scan.nextInt();
+                scan.nextLine(); 
 
-            int senha;
-            String contaDig;
+                int senha;
+                String contaDig;
 
-            switch(menu){
-                case 1:
-                    System.out.print("Digite o número da sua conta:");
-                    contaDig = scan.nextLine();
-                    System.out.print("Digite a sua senha:");
-                    senha = scan.nextInt();
-                    serv.conta.senha = senha;
-                    serv.conta.conta = contaDig;
-                    serv.tipo = estado.tipo.CRIACONTA;
-                    respostas = enviaMulticast(serv);
-                    if(!respostas.containsValue(false)){
-                        System.out.println("Conta criada com sucesso!");
-                        aplicacao();
-                    }else{
-                        System.out.println("ERRO: Não foi possivel criar conta!");
+                switch(menu){   
+                    case 1:
+                        System.out.print("Digite o número da sua conta:");
+                        contaDig = scan.nextLine();
+                        System.out.print("Digite a sua senha:");
+                        senha = scan.nextInt();
+                        serv.conta.senha = senha;
+                        serv.conta.conta = contaDig;
+                        serv.tipo = estado.tipo.CRIACONTA;
+                        respostas = enviaMulticast(serv);
+                        if(!respostas.containsValue(false)){
+                            System.out.println("Conta criada com sucesso!");
+                            aplicacao();
+                        }else{
+                            System.out.println("ERRO: Não foi possivel criar conta!");
 
-                    }
-                break;
-                case 2:
-                    System.out.println("Digite o número da sua conta:");
-                    conta.conta = scan.nextLine();
-                    System.out.println("Digite a sua senha:");
-                    conta.senha = scan.nextInt();
+                        }
+                    break;
+                    case 2:
+                        System.out.println("Digite o número da sua conta:");
+                        conta.conta = scan.nextLine();
+                        System.out.println("Digite a sua senha:");
+                        conta.senha = scan.nextInt();
 
-                    serv.conta = conta;
-                    serv.tipo = estado.tipo.CRIACONTA;
-                    int num = (int)Math.random() * canalDeComunicacao.getView().getMembers().size();
-                    membro = (Address)canalDeComunicacao.getView().getMembers().get(num);
-                    resposta = enviaUnicast(membro, serv);
-                    System.out.print(resposta);
-                    if(resposta!="false"){
-                        aplicacao();
-                    }else{
-                        System.out.println("ERRO: Não foi possivel logar!");
+                        serv.conta = conta;
+                        serv.tipo = estado.tipo.LOGIN;
+                        int num = (int)Math.random() * canalDeComunicacao.getView().getMembers().size();
+                        membro = (Address)canalDeComunicacao.getView().getMembers().get(num);
+                        resposta = enviaUnicast(membro, serv);
+                        if(resposta==null){
+                            aplicacao();
+                        }else{
+                            System.out.println("ERRO: Não foi possivel logar!");
 
-                    }
-                break;
+                        }
+                    break;
+
+                    case 3:
+                        System.out.print("Obrigada por usar Tenacious Bank!");
+                    break;
+                }
             };
 
         canalDeComunicacao.close();
@@ -117,10 +121,10 @@ public class Tbank extends ReceiverAdapter implements RequestHandler {
             estado.criaConta(serv.conta);
         }
         else if(serv.tipo == estado.tipo.TRANSFERENCIA) {
-            return estado.transferencia(serv.valor,serv.contaDest,serv.contaOrig); 
+            estado.transferencia(serv.valor,serv.contaDest,serv.contaOrig); 
         }
         else if(serv.tipo == estado.tipo.LOGIN) {
-            return estado.transferencia(serv.valor,serv.contaDest,serv.contaOrig); 
+            estado.autenticacao(serv.conta); 
         }
 
         return null;
@@ -146,6 +150,7 @@ public class Tbank extends ReceiverAdapter implements RequestHandler {
 
             switch(menu){
                 case 1:
+                    scan.nextLine(); 
                     System.out.print("Digite a conta que você deseja transferir:");
                     serv.contaDest = scan.nextLine();
                     System.out.println("Digite o valor que deseja transferir:");
@@ -167,7 +172,7 @@ public class Tbank extends ReceiverAdapter implements RequestHandler {
                     membro = (Address)canalDeComunicacao.getView().getMembers().get(num);
 
                     resposta = enviaUnicast(membro, serv);
-                    if(resposta!="false"){
+                    if(resposta!=null){
                         System.out.println("ERRO: falha ao ver o Saldo!");
 
                     }
@@ -179,7 +184,7 @@ public class Tbank extends ReceiverAdapter implements RequestHandler {
                     membro = (Address)canalDeComunicacao.getView().getMembers().get(num);
 
                     resposta = enviaUnicast(membro, serv);
-                    if(resposta!="false"){
+                    if(resposta!=null){
                         System.out.println("ERRO: falha ao ver o Extrato!");
                     }
                     break;
